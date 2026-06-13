@@ -44,9 +44,6 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (localZone) setTimeZone(localZone);
-
     fetch("https://worldcup26.ir/get/games")
       .then((res) => res.json())
       .then((data) => {
@@ -61,16 +58,19 @@ export default function Home() {
       });
   }, []);
 
+  // টেলউইন্ড v4 এর জন্য পারফেক্ট ডার্ক মোড ক্লাসরুট টগল
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
+    const root = window.document.documentElement;
+    if (isDarkMode) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
   }, [isDarkMode]);
 
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
-      // 1. tab & group safety checking
       const tabGroup = selectedTab.replace("Group ", "");
-
-      // handled if game.group and game.type are null or undefined
       const gameGroup = game.group || "";
       const gameType = game.type || "";
 
@@ -79,7 +79,6 @@ export default function Home() {
         gameGroup === tabGroup ||
         gameType.toLowerCase() === tabGroup.toLowerCase();
 
-      // 2. Home and Away Team Name Safety Check (TBD to be handled)
       const homeTeamName = game.home_team_name_en || "";
       const awayTeamName = game.away_team_name_en || "";
 
@@ -109,7 +108,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="px-4 py-2 text-xs font-bold rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95"
+            className="px-4 py-2 text-xs font-bold rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700"
           >
             {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
@@ -125,16 +124,20 @@ export default function Home() {
               placeholder="Search team..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-4 pr-10 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-amber-500 outline-none transition-all shadow-sm"
+              className="w-full pl-4 pr-10 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-amber-500 outline-none transition-all shadow-sm text-zinc-900 dark:text-white"
             />
           </div>
           <select
             value={timeZone}
             onChange={(e) => setTimeZone(e.target.value)}
-            className="w-full md:w-64 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm"
+            className="w-full md:w-64 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white"
           >
             {TIMEZONES.map((z) => (
-              <option key={z.value} value={z.value}>
+              <option
+                key={z.value}
+                value={z.value}
+                className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+              >
                 {z.label}
               </option>
             ))}
@@ -158,11 +161,10 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Dynamic Display Grid */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-zinc-400 font-medium">Loading Data...</p>
+            <p className="text-zinc-400 font-medium">Fetching Data...</p>
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
