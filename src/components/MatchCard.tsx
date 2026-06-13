@@ -33,7 +33,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       if (ampmPart.toUpperCase() === "AM" && hours === 12) hours = 0;
     }
 
-    //2. Since the API time is the local time of the venue (e.g. New York/EDT - GMT-4), we will first convert it back to pure UTC.
+    // 2. Since the API time is the local time of the venue (e.g. New York/EDT - GMT-4), we will first convert it back to pure UTC.
     // To go from New York (GMT-4) to UTC, we need to add 4 hours.
     const venueOffset = -4;
     const utcTimeInMs =
@@ -79,6 +79,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
   const getFlagUrl = (teamName: string) => {
     if (teamName === "TBD") return null;
 
+    // নিখুঁত ফ্ল্যাগ কোড ম্যাপিং (সবগুলো নতুন মিসিং দেশের জেনুইন ISO কোডসহ)
     const customMaps: { [key: string]: string } = {
       USA: "us",
       "United States": "us",
@@ -89,13 +90,46 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       England: "gb-eng",
       Brazil: "br",
       Morocco: "ma",
+      Spain: "es",
+      Portugal: "pt",
+      Uruguay: "uy",
+      Iran: "ir",
+      Japan: "jp",
+      Argentina: "ar",
+      Belgium: "be",
+      Germany: "de",
+      "Democratic Republic of the Congo": "cd",
+      "Democratic Republic...": "cd",
+      "Bosnia and Herzegovina": "ba",
+      "Bosnia and..": "ba",
+      Haiti: "ht",
+      Turkey: "tr",
+      Switzerland: "ch",
+      "Ivory Coast": "ci",
+      "Côte d'Ivoire": "ci",
+      Sweden: "se",
+      Tunisia: "tn",
     };
 
-    if (customMaps[teamName]) {
-      return `https://flagcdn.com/w80/${customMaps[teamName]}.png`;
+    const cleanName = teamName.trim();
+
+    // ১. একদম হুবহু মিল থাকলে সরাসরি রিটার্ন
+    if (customMaps[cleanName]) {
+      return `https://flagcdn.com/w80/${customMaps[cleanName]}.png`;
     }
 
-    const code = teamName.slice(0, 2).toLowerCase();
+    // ২. আংশিক নামের মিল খুঁজবে (যেমন টেক্সট ট্রাঙ্কেট হলে বা ছোট-বড় হাতের অক্ষরের অমিল হলে)
+    for (const key in customMaps) {
+      if (
+        cleanName.toLowerCase().includes(key.toLowerCase()) ||
+        key.toLowerCase().includes(cleanName.toLowerCase())
+      ) {
+        return `https://flagcdn.com/w80/${customMaps[key]}.png`;
+      }
+    }
+
+    // ৩. উপরে কোনোটার সাথে না মিললে ডিফল্ট প্রথম ২ অক্ষর
+    const code = cleanName.slice(0, 2).toLowerCase();
     return `https://flagcdn.com/w80/${code}.png`;
   };
 

@@ -12,6 +12,30 @@ const TIMEZONES = [
   { value: "Qatar", label: "Qatar (GMT+3)" },
 ];
 
+// ১. মাস্টার ম্যাপ অবজেক্টটিকে কম্পোনেন্টের বাইরে রাখা হলো (গ্লোবাল স্কোপ), যেন রেন্ডারিংয়ে কখনো রেফারেন্স মিস না হয়
+const tabApiMap: {
+  [key: string]: { type: "group" | "knockout"; value: string };
+} = {
+  "Group A": { type: "group", value: "A" },
+  "Group B": { type: "group", value: "B" },
+  "Group C": { type: "group", value: "C" },
+  "Group D": { type: "group", value: "D" },
+  "Group E": { type: "group", value: "E" },
+  "Group F": { type: "group", value: "F" },
+  "Group G": { type: "group", value: "G" },
+  "Group H": { type: "group", value: "H" },
+  "Group I": { type: "group", value: "I" },
+  "Group J": { type: "group", value: "J" },
+  "Group K": { type: "group", value: "K" },
+  "Group L": { type: "group", value: "L" },
+  "Round 32": { type: "knockout", value: "r32" },
+  "Round 16": { type: "knockout", value: "r16" },
+  "Quarter Final": { type: "knockout", value: "qf" },
+  "Semi Final": { type: "knockout", value: "sf" },
+  "3RD place": { type: "knockout", value: "3rd" },
+  FINAL: { type: "knockout", value: "final" },
+};
+
 export default function Home() {
   const [games, setGames] = useState<Game[]>([]);
   const [groups, setGroups] = useState<GroupData[]>([]);
@@ -20,28 +44,6 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const tabs = [
-    "All Matches",
-    "Group A",
-    "Group B",
-    "Group C",
-    "Group D",
-    "Group E",
-    "Group F",
-    "Group G",
-    "Group H",
-    "Group I",
-    "Group J",
-    "Group K",
-    "Group L",
-    "Group R32",
-    "Group R16",
-    "Group QF",
-    "Group SF",
-    "Group 3RD",
-    "Group FINAL",
-  ];
 
   useEffect(() => {
     fetch("https://worldcup26.ir/get/games")
@@ -58,7 +60,7 @@ export default function Home() {
       });
   }, []);
 
-  // টেলউইন্ড v4 এর জন্য পারফেক্ট ডার্ক মোড ক্লাসরুট টগল
+  // টেলউইন্ড v4 এর জন্য ডার্ক মোড রুট টগল
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
@@ -68,31 +70,38 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
+  // সিঙ্গেল অবজেক্ট বেসড নিখুঁত ফিল্টারিং লজিক
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
-      const tabGroup = selectedTab.replace("Group ", "");
-      const gameGroup = game.group || "";
-      const gameType = game.type || "";
-
-      const matchesTab =
-        selectedTab === "All Matches" ||
-        gameGroup === tabGroup ||
-        gameType.toLowerCase() === tabGroup.toLowerCase();
-
       const homeTeamName = game.home_team_name_en || "";
       const awayTeamName = game.away_team_name_en || "";
-
       const matchesSearch =
         homeTeamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         awayTeamName.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesTab && matchesSearch;
+      if (!matchesSearch) return false;
+      if (selectedTab === "All Matches") return true;
+
+      const tabConfig = tabApiMap[selectedTab];
+      if (!tabConfig) return false;
+
+      if (tabConfig.type === "group") {
+        return game.group === tabConfig.value;
+      } else {
+        return (
+          (game.type || "").toLowerCase() === tabConfig.value.toLowerCase()
+        );
+      }
     });
   }, [games, selectedTab, searchQuery]);
 
+  // পয়েন্ট টেবিল কন্ট্রোল
   const activeGroupStandings = useMemo(() => {
-    const groupName = selectedTab.replace("Group ", "");
-    return groups.find((g) => g.name === groupName);
+    const tabConfig = tabApiMap[selectedTab];
+    if (tabConfig && tabConfig.type === "group") {
+      return groups.find((g) => g.name === tabConfig.value);
+    }
+    return undefined;
   }, [groups, selectedTab]);
 
   return (
@@ -145,8 +154,19 @@ export default function Home() {
         </div>
 
         {/* Tab Navigation Menu */}
-        <div className="flex gap-2 overflow-x-auto pb-6 mb-8 no-scrollbar">
-          {tabs.map((tab) => (
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-8 custom-scrollbar">
+          <button
+            onClick={() => setSelectedTab("All Matches")}
+            className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
+              selectedTab === "All Matches"
+                ? "bg-amber-500 border-amber-500 text-white shadow-md scale-105"
+                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
+            }`}
+          >
+            All Matches
+          </button>
+
+          {Object.keys(tabApiMap).map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
@@ -164,7 +184,7 @@ export default function Home() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-zinc-400 font-medium">Fetching Data...</p>
+            <p className="text-zinc-400 font-medium">Loading Data...</p>
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
