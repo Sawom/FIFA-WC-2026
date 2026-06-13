@@ -29,6 +29,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
     }
   };
 
+  // time zone
   const stadiumTimezones: Record<string, string> = {
     "1": "America/Mexico_City",
     "2": "America/Mexico_City",
@@ -48,8 +49,27 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
     "16": "America/Los_Angeles",
   };
 
-  const venueName =
-    stadiumTimezones[(game as any).stadium_id] || "Unknown Stadium";
+  // stadiums
+  const stadiumNames: Record<string, string> = {
+    "1": "Mexico City Stadium",
+    "2": "Estadio Guadalajara",
+    "3": "Estadio Monterrey",
+    "4": "Dallas Stadium",
+    "5": "Houston Stadium",
+    "6": "Kansas City Stadium",
+    "7": "Atlanta Stadium",
+    "8": "Miami Stadium",
+    "9": "Boston Stadium",
+    "10": "Philadelphia Stadium",
+    "11": "MetLife Stadium",
+    "12": "Toronto Stadium",
+    "13": "BC Place Vancouver",
+    "14": "Seattle Stadium",
+    "15": "San Francisco Bay Area Stadium",
+    "16": "Los Angeles Stadium",
+  };
+
+  const venueName = stadiumNames[(game as any).stadium_id] || "Unknown Stadium";
 
   // timezone calculation
   const getFormattedTime = () => {
