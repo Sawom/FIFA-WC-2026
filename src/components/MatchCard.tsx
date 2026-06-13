@@ -1,5 +1,6 @@
 import React from "react";
 import { Game } from "@/types/worldcup";
+import { DateTime } from "luxon";
 
 interface MatchCardProps {
   game: Game;
@@ -7,67 +8,62 @@ interface MatchCardProps {
 }
 
 export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
-  let displayTime = game.local_date;
+  const stadiumTimezones: Record<string, string> = {
+    "1": "America/Mexico_City",
+    "2": "America/Mexico_City",
+    "3": "America/Monterrey",
+    "4": "America/Chicago",
+    "5": "America/Chicago",
+    "6": "America/Chicago",
+    "7": "America/New_York",
+    "8": "America/New_York",
+    "9": "America/New_York",
+    "10": "America/New_York",
+    "11": "America/New_York",
+    "12": "America/Toronto",
+    "13": "America/Vancouver",
+    "14": "America/Los_Angeles",
+    "15": "America/Los_Angeles",
+    "16": "America/Los_Angeles",
+  };
 
-  try {
-    // 1. Separate data from the API's 'dd/mm/yyyy hh:mm AM/PM' or 24-hour format
-    const [datePart, timePart, ampmPart] = game.local_date.split(" ");
-    const parts = datePart.split("/").map(Number);
+  const venueName =
+    stadiumTimezones[(game as any).stadium_id] || "Unknown Stadium";
 
-    // Safety Check: Separating the day and month
-    let day = parts[0];
-    let month = parts[1];
-    let year = parts[2];
-    if (parts[0] <= 12 && parts[1] > 12) {
-      month = parts[0];
-      day = parts[1];
+  // timezone calculation
+  const getFormattedTime = () => {
+    try {
+      const [datePart, timePart] = game.local_date.trim().split(/\s+/);
+      const [month, day, year] = datePart.split("/").map(Number);
+      const [hour, minute] = timePart.split(":").map(Number);
+
+      // venue এর timezone দিয়ে parse করো
+      const venueZone = stadiumTimezones[game.stadium_id] ?? "America/New_York";
+
+      const dt = DateTime.fromObject(
+        { year, month, day, hour, minute },
+        { zone: venueZone },
+      );
+
+      const zoneMap: Record<string, string> = {
+        "Asia/Dhaka": "Asia/Dhaka",
+        "America/New_York": "America/New_York",
+        "Europe/London": "Europe/London",
+        "Asia/Qatar": "Asia/Qatar",
+      };
+
+      const targetZone = zoneMap[timeZone] ?? "Asia/Dhaka";
+
+      return dt
+        .setZone(targetZone)
+        .toFormat("dd/MM/yyyy hh:mm a")
+        .toLowerCase();
+    } catch (e) {
+      return game.local_date;
     }
+  };
 
-    const timeComponents = timePart.split(":").map(Number);
-    let hours = timeComponents[0];
-    const minutes = timeComponents[1];
-
-    // If the API returns time in 12-hour AM/PM format
-    if (ampmPart) {
-      if (ampmPart.toUpperCase() === "PM" && hours < 12) hours += 12;
-      if (ampmPart.toUpperCase() === "AM" && hours === 12) hours = 0;
-    }
-
-    // 2. Since the API time is the local time of the venue (e.g. New York/EDT - GMT-4), we will first convert it back to pure UTC.
-    // To go from New York (GMT-4) to UTC, we need to add 4 hours.
-    const venueOffset = -4;
-    const utcTimeInMs =
-      Date.UTC(year, month - 1, day, hours, minutes) -
-      venueOffset * 60 * 60 * 1000;
-
-    // 3. Add offset according to the zone selected by the user in the dropdown (relative to UTC)
-    let targetOffset = 6; // ডিফল্ট ঢাকা (GMT+6)
-    if (timeZone === "Asia/Dhaka") targetOffset = 6;
-    if (timeZone === "America/New_York") targetOffset = -4;
-    if (timeZone === "Europe/London") targetOffset = 1;
-    if (timeZone === "Qatar") targetOffset = 3;
-
-    // miliseconds calculation
-    const targetTimeInMs = utcTimeInMs + targetOffset * 60 * 60 * 1000;
-    const finalDate = new Date(targetTimeInMs);
-
-    // 4. output formatting (dd/MM/yyyy hh:mm AM/PM)
-    const d = String(finalDate.getUTCDate()).padStart(2, "0");
-    const m = String(finalDate.getUTCMonth() + 1).padStart(2, "0");
-    const y = finalDate.getUTCFullYear();
-
-    let h = finalDate.getUTCHours();
-    const min = String(finalDate.getUTCMinutes()).padStart(2, "0");
-    const ampm = h >= 12 ? "PM" : "AM";
-
-    h = h % 12;
-    h = h ? h : 12;
-    const hr = String(h).padStart(2, "0");
-
-    displayTime = `${d}/${m}/${y} ${hr}:${min} ${ampm}`;
-  } catch (e) {
-    displayTime = game.local_date;
-  }
+  const displayTime = getFormattedTime();
 
   const isLive =
     game.time_elapsed !== "notstarted" && game.finished === "FALSE";
@@ -79,7 +75,6 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
   const getFlagUrl = (teamName: string) => {
     if (teamName === "TBD") return null;
 
-    // flag mapping
     const customMaps: { [key: string]: string } = {
       USA: "us",
       "United States": "us",
@@ -109,16 +104,16 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       "Côte d'Ivoire": "ci",
       Sweden: "se",
       Tunisia: "tn",
+      Netherlands: "nl",
+      "New Zealand": "nz",
     };
 
     const cleanName = teamName.trim();
 
-    // 1. Direct return if there is an exact match
     if (customMaps[cleanName]) {
       return `https://flagcdn.com/w80/${customMaps[cleanName]}.png`;
     }
 
-    // 2. Will match partial names (e.g. if the text is truncated or if there is a case mismatch)
     for (const key in customMaps) {
       if (
         cleanName.toLowerCase().includes(key.toLowerCase()) ||
@@ -128,7 +123,6 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       }
     }
 
-    // 3. If it does not match any of the above, the default first 2 letters
     const code = cleanName.slice(0, 2).toLowerCase();
     return `https://flagcdn.com/w80/${code}.png`;
   };
@@ -145,12 +139,13 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
   };
 
   return (
-    <div className="relative p-5 border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+    <div className="relative p-5 border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 transition-all shadow-sm hover:shadow-md flex flex-col justify-between gap-4">
       {/* Top Header Row */}
-      <div className="flex justify-between items-center text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-4">
+      <div className="flex justify-between items-center text-xs font-semibold text-zinc-500 dark:text-zinc-400">
         <span className="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-md text-amber-600 dark:text-amber-500">
+          MATCH #{game.id} |{" "}
           {game.type === "group"
-            ? `Group ${game.group}`
+            ? `GROUP ${game.group}`
             : game.type.toUpperCase()}
         </span>
         {isLive && (
@@ -235,20 +230,31 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       </div>
 
       {/* Footer Details */}
-      <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center text-xs text-zinc-400">
-        <span className="font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2.5 py-1 rounded-lg">
-          {displayTime}
-        </span>
-        {!isFinished && homeTeam !== "TBD" && awayTeam !== "TBD" && (
-          <a
-            href={getCalendarLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-amber-500 transition-colors"
-          >
-            🔔
-          </a>
-        )}
+      <div className="mt-2 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-2">
+        <div className="flex justify-between items-center text-xs text-zinc-400">
+          {/* date and time */}
+          <span className="font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2.5 py-1 rounded-lg">
+            {displayTime}
+          </span>
+
+          {/* venue */}
+          <div className="flex items-center gap-1.5 max-w-[55%] md:max-w-[60%]">
+            <span className="font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2.5 py-1 rounded-lg">
+              🏟️ {venueName}
+            </span>
+
+            {!isFinished && homeTeam !== "TBD" && awayTeam !== "TBD" && (
+              <a
+                href={getCalendarLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-amber-500 transition-colors flex-shrink-0"
+              >
+                🔔
+              </a>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

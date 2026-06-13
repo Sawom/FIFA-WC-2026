@@ -52,6 +52,7 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   // dark / light mode state
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
@@ -61,7 +62,7 @@ export default function Home() {
     return false;
   });
 
-  //  (async/await + Promise.all)
+  // (async/await + Promise.all)
   useEffect(() => {
     const loadInitialDashboardData = async () => {
       try {
@@ -105,9 +106,10 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // filtering
-  const filteredGames = useMemo(() => {
-    return games.filter((game) => {
+  // 🛠️ filtering + Sequential ID Sorting Logic
+  const filteredAndSortedGames = useMemo(() => {
+    // ১. সার্চ কোয়েরি এবং ট্যাব অনুযায়ী ম্যাচ ফিল্টার করা
+    const filtered = games.filter((game) => {
       const homeTeamName = game.home_team_name_en || "";
       const awayTeamName = game.away_team_name_en || "";
       const matchesSearch =
@@ -128,6 +130,9 @@ export default function Home() {
         );
       }
     });
+
+    // ২. সরাসরি ম্যাচের ID দিয়ে আরোহী ক্রমে (1, 2, 3... 104) নিখুঁতভাবে সর্ট করা
+    return [...filtered].sort((a, b) => Number(a.id) - Number(b.id));
   }, [games, selectedTab, searchQuery]);
 
   // point table control
@@ -148,10 +153,6 @@ export default function Home() {
     }
     return undefined;
   }, [groups, selectedTab]);
-
-  // console.log("--- DEBUGGING WORLD CUP DATA ---");
-  // console.log("All Teams Data from API:", allTeams);
-  // console.log("Active Group Standings Data:", activeGroupStandings);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors pb-20">
@@ -202,6 +203,7 @@ export default function Home() {
         <p className="mb-6 text-center text-[18px] font-bold">
           June 11 - July 19, 2026
         </p>
+
         {/* Search & Filter Section */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
           {/* 1. search */}
@@ -220,8 +222,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full pl-4 pr-10 py-3 text-left rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white
-               focus:ring-2 focus:ring-amber-500 transition-all flex justify-between items-center"
+              className="w-full pl-4 pr-10 py-3 text-left rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500 transition-all flex justify-between items-center"
             >
               <span>
                 {TIMEZONES.find((z) => z.value === timeZone)?.label ||
@@ -292,6 +293,7 @@ export default function Home() {
             )}
           </div>
         </div>
+
         {/* Tab Navigation Menu */}
         <div className="flex gap-2 overflow-x-auto pb-3 mb-8 custom-scrollbar">
           <button
@@ -319,6 +321,7 @@ export default function Home() {
             </button>
           ))}
         </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
@@ -326,7 +329,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/*  table rendering section */}
+            {/* table rendering section */}
             {activeGroupStandings && (
               <StandingsTable
                 teams={activeGroupStandings.teams}
@@ -335,8 +338,9 @@ export default function Home() {
               />
             )}
 
+            {/* 🛠️ এখানে মডিফাইড filteredAndSortedGames লুপ চালানো হয়েছে */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredGames.map((game) => (
+              {filteredAndSortedGames.map((game) => (
                 <MatchCard key={game.id} game={game} timeZone={timeZone} />
               ))}
             </div>
