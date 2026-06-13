@@ -62,36 +62,54 @@ export default function Home() {
     return false;
   });
 
-  // (async/await + Promise.all)
+  // match data fetching
   useEffect(() => {
-    const loadInitialDashboardData = async () => {
-      try {
-        setLoading(true);
-
-        const [gamesRes, groupsRes, teamsRes] = await Promise.all([
-          fetch("https://worldcup26.ir/get/games"),
-          fetch("https://worldcup26.ir/get/groups"),
-          fetch("https://worldcup26.ir/get/teams"),
-        ]);
-
-        // Convert responses to JSON
-        const gamesData = await gamesRes.json();
-        const groupsData = await groupsRes.json();
-        const teamsData = await teamsRes.json();
-
-        // Checking for correct and valid data and push it to the state.
-        if (gamesData && gamesData.games) setGames(gamesData.games);
-        if (groupsData && groupsData.groups) setGroups(groupsData.groups);
-        if (teamsData && teamsData.teams) setAllTeams(teamsData.teams);
-      } catch (err) {
-        console.error("Dashboard Global Data Fetching Error:", err);
-      } finally {
-        setLoading(false); // The loader will stop as soon as all data has been received successfully or failed.
-      }
-    };
-
+    // This function will be called as soon as the component is mounted.
     loadInitialDashboardData();
-  }, []);
+  }, []); // Empty dependency array means it runs once on mount
+
+  const loadInitialDashboardData = async () => {
+    // 1. check cash
+    const cachedData = localStorage.getItem("wc_data");
+    if (cachedData) {
+      const { games, groups, teams } = JSON.parse(cachedData);
+      setGames(games);
+      setGroups(groups);
+      setAllTeams(teams);
+      setLoading(false); // If there is cache, there is no need to show loading, so set it to false.
+    }
+
+    // 2. Fetch the latest data from the API
+    try {
+      const [gamesRes, groupsRes, teamsRes] = await Promise.all([
+        fetch("https://worldcup26.ir/get/games"),
+        fetch("https://worldcup26.ir/get/groups"),
+        fetch("https://worldcup26.ir/get/teams"),
+      ]);
+
+      const gamesData = await gamesRes.json();
+      const groupsData = await groupsRes.json();
+      const teamsData = await teamsRes.json();
+
+      const dataToSave = {
+        games: gamesData.games,
+        groups: groupsData.groups,
+        teams: teamsData.teams,
+      };
+
+      // 3. save the new data
+      localStorage.setItem("wc_data", JSON.stringify(dataToSave));
+
+      // 4. then updating the state
+      setGames(gamesData.games);
+      setGroups(groupsData.groups);
+      setAllTeams(teamsData.teams);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // dark / light mode
   // save mode states is local storage
@@ -131,7 +149,7 @@ export default function Home() {
       }
     });
 
-    // ২. সরাসরি ম্যাচের ID দিয়ে আরোহী ক্রমে (1, 2, 3... 104) নিখুঁতভাবে সর্ট করা
+    // 2. Sorting exactly in ascending order (1, 2, 3... 104) by direct match ID
     return [...filtered].sort((a, b) => Number(a.id) - Number(b.id));
   }, [games, selectedTab, searchQuery]);
 
