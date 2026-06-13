@@ -338,8 +338,7 @@ export default function Home() {
               />
             )}
 
-            {/* 🛠️ এখানে মডিফাইড filteredAndSortedGames লুপ চালানো হয়েছে */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
               {filteredAndSortedGames.map((game) => (
                 <MatchCard key={game.id} game={game} timeZone={timeZone} />
               ))}

@@ -8,6 +8,27 @@ interface MatchCardProps {
 }
 
 export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
+  const parseScorers = (data: string | null | undefined) => {
+    if (!data || data === "null") return [];
+
+    try {
+      // ২. স্মার্ট কোট “ ” এবং \ কে ক্লিন করা
+      let sanitized = data
+        .replace(/“/g, '"')
+        .replace(/”/g, '"')
+        .replace(/\\"/g, '"');
+
+      // ৩. যদি ডেটা এমন হয় {”a”,”b”} তবে সেটিকে ["a", "b"] এ রূপান্তর করা
+      sanitized = sanitized.replace(/\{/g, "[").replace(/\}/g, "]");
+
+      const parsed = JSON.parse(sanitized);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error("Scorer parsing error:", e);
+      return [];
+    }
+  };
+
   const stadiumTimezones: Record<string, string> = {
     "1": "America/Mexico_City",
     "2": "America/Mexico_City",
@@ -185,6 +206,19 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
           >
             {homeTeam}
           </span>
+          {/* Home Team Scorers */}
+          <div className="flex flex-col gap-1 mt-1">
+            {parseScorers(game.home_scorers).map(
+              (scorer: string, i: number) => (
+                <span
+                  key={i}
+                  className="text-[10px] text-zinc-500 font-medium text-center truncate"
+                >
+                  ⚽ {scorer}
+                </span>
+              ),
+            )}
+          </div>
         </div>
 
         {/* Score Board */}
@@ -226,6 +260,19 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
           >
             {awayTeam}
           </span>
+
+          <div className="flex flex-col gap-1 mt-1">
+            {parseScorers(game.away_scorers).map(
+              (scorer: string, i: number) => (
+                <span
+                  key={i}
+                  className="text-[10px] text-zinc-500 font-medium text-center truncate"
+                >
+                  ⚽ {scorer}
+                </span>
+              ),
+            )}
+          </div>
         </div>
       </div>
 
@@ -239,7 +286,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
 
           {/* venue */}
           <div className="flex items-center gap-1.5 max-w-[55%] md:max-w-[60%]">
-            <span className="font-bold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2.5 py-1 rounded-lg">
+            <span className="font-bold text-[11px] text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800/60 px-2.5 py-1 rounded-lg">
               🏟️ {venueName}
             </span>
 
