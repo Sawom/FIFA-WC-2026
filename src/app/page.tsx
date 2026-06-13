@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Game, GroupData } from "@/types/worldcup";
-import { MatchCard } from "@/components/MatchCard";
 import { StandingsTable } from "@/components/StandingsTable";
+import { MatchCard } from "@/components/MatchCard";
+import { Game } from "@/types/worldcup";
+
+interface GroupData {
+  name: string;
+  teams: any[];
+}
 
 const TIMEZONES = [
   { value: "Asia/Dhaka", label: "Dhaka (GMT+6)" },
@@ -12,7 +17,7 @@ const TIMEZONES = [
   { value: "Qatar", label: "Qatar (GMT+3)" },
 ];
 
-// ১. মাস্টার ম্যাপ অবজেক্টটিকে কম্পোনেন্টের বাইরে রাখা হলো (গ্লোবাল স্কোপ), যেন রেন্ডারিংয়ে কখনো রেফারেন্স মিস না হয়
+// 1. The master map object is kept outside the component (global scope), so that the reference is never missed during rendering
 const tabApiMap: {
   [key: string]: { type: "group" | "knockout"; value: string };
 } = {
@@ -39,28 +44,45 @@ const tabApiMap: {
 export default function Home() {
   const [games, setGames] = useState<Game[]>([]);
   const [groups, setGroups] = useState<GroupData[]>([]);
+  const [allTeams, setAllTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  //  (async/await + Promise.all)
   useEffect(() => {
-    fetch("https://worldcup26.ir/get/games")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.games) setGames(data.games);
-        setLoading(false);
-      });
+    const loadInitialDashboardData = async () => {
+      try {
+        setLoading(true);
 
-    fetch("https://worldcup26.ir/get/groups")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.groups) setGroups(data.groups);
-      });
+        const [gamesRes, groupsRes, teamsRes] = await Promise.all([
+          fetch("https://worldcup26.ir/get/games"),
+          fetch("https://worldcup26.ir/get/groups"),
+          fetch("https://worldcup26.ir/get/teams"),
+        ]);
+
+        // Convert responses to JSON
+        const gamesData = await gamesRes.json();
+        const groupsData = await groupsRes.json();
+        const teamsData = await teamsRes.json();
+
+        // Checking for correct and valid data and push it to the state.
+        if (gamesData && gamesData.games) setGames(gamesData.games);
+        if (groupsData && groupsData.groups) setGroups(groupsData.groups);
+        if (teamsData && teamsData.teams) setAllTeams(teamsData.teams);
+      } catch (err) {
+        console.error("Dashboard Global Data Fetching Error:", err);
+      } finally {
+        setLoading(false); // The loader will stop as soon as all data has been received successfully or failed.
+      }
+    };
+
+    loadInitialDashboardData();
   }, []);
 
-  // টেলউইন্ড v4 এর জন্য ডার্ক মোড রুট টগল
+  // dark / light mode
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
@@ -70,7 +92,7 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // সিঙ্গেল অবজেক্ট বেসড নিখুঁত ফিল্টারিং লজিক
+  // filtering
   const filteredGames = useMemo(() => {
     return games.filter((game) => {
       const homeTeamName = game.home_team_name_en || "";
@@ -95,14 +117,28 @@ export default function Home() {
     });
   }, [games, selectedTab, searchQuery]);
 
-  // পয়েন্ট টেবিল কন্ট্রোল
+  // point table control
   const activeGroupStandings = useMemo(() => {
     const tabConfig = tabApiMap[selectedTab];
     if (tabConfig && tabConfig.type === "group") {
-      return groups.find((g) => g.name === tabConfig.value);
+      return groups.find((g) => {
+        if (!g || !g.name) return false;
+
+        const apiGroupName = String(g.name).toLowerCase().trim();
+        const targetValue = String(tabConfig.value).toLowerCase().trim();
+
+        return (
+          apiGroupName === targetValue ||
+          apiGroupName === `group ${targetValue}`
+        );
+      });
     }
     return undefined;
   }, [groups, selectedTab]);
+
+  // console.log("--- DEBUGGING WORLD CUP DATA ---");
+  // console.log("All Teams Data from API:", allTeams);
+  // console.log("Active Group Standings Data:", activeGroupStandings);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors pb-20">
@@ -188,10 +224,12 @@ export default function Home() {
           </div>
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/*  table rendering section */}
             {activeGroupStandings && (
               <StandingsTable
                 teams={activeGroupStandings.teams}
                 groupName={activeGroupStandings.name}
+                allTeamsData={allTeams}
               />
             )}
 

@@ -79,7 +79,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
   const getFlagUrl = (teamName: string) => {
     if (teamName === "TBD") return null;
 
-    // নিখুঁত ফ্ল্যাগ কোড ম্যাপিং (সবগুলো নতুন মিসিং দেশের জেনুইন ISO কোডসহ)
+    // flag mapping
     const customMaps: { [key: string]: string } = {
       USA: "us",
       "United States": "us",
@@ -113,12 +113,12 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
 
     const cleanName = teamName.trim();
 
-    // ১. একদম হুবহু মিল থাকলে সরাসরি রিটার্ন
+    // 1. Direct return if there is an exact match
     if (customMaps[cleanName]) {
       return `https://flagcdn.com/w80/${customMaps[cleanName]}.png`;
     }
 
-    // ২. আংশিক নামের মিল খুঁজবে (যেমন টেক্সট ট্রাঙ্কেট হলে বা ছোট-বড় হাতের অক্ষরের অমিল হলে)
+    // 2. Will match partial names (e.g. if the text is truncated or if there is a case mismatch)
     for (const key in customMaps) {
       if (
         cleanName.toLowerCase().includes(key.toLowerCase()) ||
@@ -128,7 +128,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       }
     }
 
-    // ৩. উপরে কোনোটার সাথে না মিললে ডিফল্ট প্রথম ২ অক্ষর
+    // 3. If it does not match any of the above, the default first 2 letters
     const code = cleanName.slice(0, 2).toLowerCase();
     return `https://flagcdn.com/w80/${code}.png`;
   };
