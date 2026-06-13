@@ -39,7 +39,7 @@ const tabApiMap: {
   "Round 16": { type: "knockout", value: "r16" },
   "Quarter Final": { type: "knockout", value: "qf" },
   "Semi Final": { type: "knockout", value: "sf" },
-  "3RD place": { type: "knockout", value: "3rd" },
+  "3RD place": { type: "knockout", value: "third" },
   FINAL: { type: "knockout", value: "final" },
 };
 
@@ -106,9 +106,9 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // 🛠️ filtering + Sequential ID Sorting Logic
+  //  filtering + Sequential ID Sorting Logic
   const filteredAndSortedGames = useMemo(() => {
-    // ১. সার্চ কোয়েরি এবং ট্যাব অনুযায়ী ম্যাচ ফিল্টার করা
+    // 1. Filter matches by search query and tab
     const filtered = games.filter((game) => {
       const homeTeamName = game.home_team_name_en || "";
       const awayTeamName = game.away_team_name_en || "";
