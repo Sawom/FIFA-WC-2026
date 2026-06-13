@@ -51,8 +51,15 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // dark / light mode state
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      return savedTheme === "dark";
+    }
+    return false;
+  });
 
   //  (async/await + Promise.all)
   useEffect(() => {
@@ -86,12 +93,15 @@ export default function Home() {
   }, []);
 
   // dark / light mode
+  // save mode states is local storage
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
       root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
 
@@ -189,7 +199,9 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 pt-8">
-        <p className="mb-6 text-center"> June 11 - July 19, 2026</p>
+        <p className="mb-6 text-center text-[18px] font-bold">
+          June 11 - July 19, 2026
+        </p>
         {/* Search & Filter Section */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
           {/* 1. search */}
