@@ -41,18 +41,16 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({
 
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-sm text-left">
-          <thead className="text-xs font-semibold text-zinc-400 uppercase bg-zinc-50/50 dark:bg-zinc-900/30 border-b border-zinc-100 dark:border-zinc-800">
+          <thead className="text-xs font-semibold text-zinc-600 uppercase bg-zinc-50/50 dark:bg-zinc-900/60 border-b border-zinc-100 dark:border-zinc-800">
             <tr>
               <th className="px-6 py-3 w-16 text-center">Pos</th>
               <th className="px-6 py-3">Team</th>
-              <th className="px-4 py-3 text-center">MP</th>
-              <th className="px-4 py-3 text-center">W</th>
-              <th className="px-4 py-3 text-center">D</th>
-              <th className="px-4 py-3 text-center">L</th>
-              <th className="px-4 py-3 text-center">GD</th>
-              <th className="px-6 py-3 text-center font-bold text-zinc-700 dark:text-zinc-300">
-                Pts
-              </th>
+              <th className="px-4 py-3 text-center">Match Played</th>
+              <th className="px-4 py-3 text-center">Win</th>
+              <th className="px-4 py-3 text-center">Draw</th>
+              <th className="px-4 py-3 text-center">Lost</th>
+              <th className="px-4 py-3 text-center">Goal Difference</th>
+              <th className="px-6 py-3 text-center">Points</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">

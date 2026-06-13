@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useMemo } from "react";
 import { StandingsTable } from "@/components/StandingsTable";
 import { MatchCard } from "@/components/MatchCard";
 import { Game } from "@/types/worldcup";
+import logo from "../asset/logo.png";
 
 interface GroupData {
   name: string;
@@ -50,6 +52,7 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   //  (async/await + Promise.all)
   useEffect(() => {
@@ -145,9 +148,18 @@ export default function Home() {
       {/* Navigation Header */}
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">⚽</span>
-            <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white">
+          <div className="flex items-center gap-3">
+            <div className="relative w-14 h-14 flex-shrink-0">
+              <Image
+                src={logo}
+                alt="FIFA World Cup 2026 Logo"
+                fill
+                className="object-contain"
+                priority
+                unoptimized
+              />
+            </div>
+            <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
               WORLD CUP 2026
             </h1>
           </div>
@@ -163,6 +175,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 pt-8">
         {/* Search & Filter Section */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
+          {/* ১. সার্চ ইনপুট সেকশন */}
           <div className="relative w-full md:w-96">
             <input
               type="text"
@@ -172,21 +185,83 @@ export default function Home() {
               className="w-full pl-4 pr-10 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-amber-500 outline-none transition-all shadow-sm text-zinc-900 dark:text-white"
             />
           </div>
-          <select
-            value={timeZone}
-            onChange={(e) => setTimeZone(e.target.value)}
-            className="w-full md:w-64 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white"
-          >
-            {TIMEZONES.map((z) => (
-              <option
-                key={z.value}
-                value={z.value}
-                className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white"
+
+          {/* dropdown menu */}
+          <div className="relative w-full md:w-64">
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full pl-4 pr-10 py-3 text-left rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white
+               focus:ring-2 focus:ring-amber-500 transition-all flex justify-between items-center"
+            >
+              <span>
+                {TIMEZONES.find((z) => z.value === timeZone)?.label ||
+                  "Select Timezone"}
+              </span>
+              <svg
+                className={`w-4 h-4 text-zinc-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {z.label}
-              </option>
-            ))}
-          </select>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {isDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setIsDropdownOpen(false)}
+                />
+
+                <div className="absolute z-20 w-full mt-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="p-1 flex flex-col gap-1">
+                    {TIMEZONES.map((z) => {
+                      const isSelected = z.value === timeZone;
+                      return (
+                        <button
+                          key={z.value}
+                          type="button"
+                          onClick={() => {
+                            setTimeZone(z.value);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between ${
+                            isSelected
+                              ? "bg-amber-500 text-black font-semibold shadow-sm"
+                              : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-[0.99]"
+                          }`}
+                        >
+                          <span>{z.label}</span>
+                          {isSelected && (
+                            <svg
+                              className="w-4 h-4 text-black"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2.5"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Tab Navigation Menu */}
@@ -195,8 +270,8 @@ export default function Home() {
             onClick={() => setSelectedTab("All Matches")}
             className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
               selectedTab === "All Matches"
-                ? "bg-amber-500 border-amber-500 text-white shadow-md scale-105"
-                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
+                ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
+                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-black dark:text-zinc-400 hover:border-amber-500"
             }`}
           >
             All Matches
@@ -208,7 +283,7 @@ export default function Home() {
               onClick={() => setSelectedTab(tab)}
               className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
                 selectedTab === tab
-                  ? "bg-amber-500 border-amber-500 text-white shadow-md scale-105"
+                  ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
                   : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
               }`}
             >
