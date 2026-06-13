@@ -159,10 +159,26 @@ export default function Home() {
                 unoptimized
               />
             </div>
-            <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white leading-none">
-              WORLD CUP 2026
-            </h1>
+
+            <div className="flex flex-col justify-center">
+              <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
+                WORLD CUP 2026
+              </h1>
+
+              <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 mt-0.5 select-none">
+                Developed by
+                <a
+                  href="https://www.linkedin.com/in/abdur-rashid-sawom-3379a0262/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-black mx-3 dark:text-amber-400 hover:underline hover:text-amber-600 transition-all cursor-pointer"
+                >
+                  Abdur Rashid Sawom
+                </a>
+              </p>
+            </div>
           </div>
+
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className="px-4 py-2 text-xs font-bold rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700"
@@ -173,9 +189,10 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 pt-8">
+        <p className="mb-6 text-center"> June 11 - July 19, 2026</p>
         {/* Search & Filter Section */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
-          {/* ১. সার্চ ইনপুট সেকশন */}
+          {/* 1. search */}
           <div className="relative w-full md:w-96">
             <input
               type="text"
@@ -263,7 +280,6 @@ export default function Home() {
             )}
           </div>
         </div>
-
         {/* Tab Navigation Menu */}
         <div className="flex gap-2 overflow-x-auto pb-3 mb-8 custom-scrollbar">
           <button
@@ -291,7 +307,6 @@ export default function Home() {
             </button>
           ))}
         </div>
-
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
