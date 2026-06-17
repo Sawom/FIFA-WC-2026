@@ -151,6 +151,13 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       Croatia: "hr",
       Algeria: "dz",
       Mexico: "mx",
+      Scotland: "gb-sct",
+      "Cape Verde": "cv",
+      Curaçao: "cw",
+      Uzbekistan: "uz",
+      Colombia: "co",
+      Ghana: "gh",
+      Panama: "pa",
     };
 
     const cleanName = teamName.trim();
