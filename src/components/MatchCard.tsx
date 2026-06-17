@@ -147,6 +147,9 @@ export const MatchCard: React.FC<MatchCardProps> = ({ game, timeZone }) => {
       Tunisia: "tn",
       Netherlands: "nl",
       "New Zealand": "nz",
+      Austria: "at",
+      Croatia: "hr",
+      Algeria: "dz",
     };
 
     const cleanName = teamName.trim();
