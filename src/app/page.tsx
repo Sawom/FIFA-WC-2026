@@ -69,17 +69,29 @@ export default function Home() {
   }, []); // Empty dependency array means it runs once on mount
 
   const loadInitialDashboardData = async () => {
-    // 1. check cash
-    const cachedData = localStorage.getItem("wc_data");
-    if (cachedData) {
-      const { games, groups, teams } = JSON.parse(cachedData);
-      setGames(games);
-      setGroups(groups);
-      setAllTeams(teams);
-      setLoading(false); // If there is cache, there is no need to show loading, so set it to false.
+    const CACHE_KEY = "wc_data";
+    const TIME_KEY = "wc_data_time";
+    const CACHE_DURATION = 5 * 60 * 1000; // cash time 5 mins
+
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const lastFetchTime = localStorage.getItem(TIME_KEY);
+
+    // 1. Check cash: If there is cash and the time is less than 5 minutes
+    if (cachedData && lastFetchTime) {
+      const isCacheValid = Date.now() - Number(lastFetchTime) < CACHE_DURATION;
+
+      if (isCacheValid) {
+        const { games, groups, teams } = JSON.parse(cachedData);
+        setGames(games);
+        setGroups(groups);
+        setAllTeams(teams);
+        setLoading(false);
+        return; // If it's less than 5 minutes, no need to call the API, just return from here.
+      }
     }
 
-    // 2. Fetch the latest data from the API
+    // 2. Fetch new data (if there is no cache or 5 minutes have passed)
+    setLoading(true); 
     try {
       const [gamesRes, groupsRes, teamsRes] = await Promise.all([
         fetch("https://worldcup26.ir/get/games"),
@@ -97,10 +109,11 @@ export default function Home() {
         teams: teamsData.teams,
       };
 
-      // 3. save the new data
-      localStorage.setItem("wc_data", JSON.stringify(dataToSave));
+      // 3. Save the new data and current time
+      localStorage.setItem(CACHE_KEY, JSON.stringify(dataToSave));
+      localStorage.setItem(TIME_KEY, String(Date.now()));
 
-      // 4. then updating the state
+      // 4. Update the status
       setGames(gamesData.games);
       setGroups(groupsData.groups);
       setAllTeams(teamsData.teams);
