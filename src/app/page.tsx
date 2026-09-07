@@ -91,7 +91,7 @@ export default function Home() {
     }
 
     // 2. Fetch new data (if there is no cache or 5 minutes have passed)
-    setLoading(true); 
+    setLoading(true);
     try {
       const [gamesRes, groupsRes, teamsRes] = await Promise.all([
         fetch("https://worldcup26.ir/get/games"),
@@ -140,7 +140,7 @@ export default function Home() {
   //  filtering + Sequential ID Sorting Logic
   const filteredAndSortedGames = useMemo(() => {
     // 1. Filter matches by search query and tab
-    const filtered = games.filter((game) => {
+    const filtered = (games || []).filter((game) => {
       const homeTeamName = game.home_team_name_en || "";
       const awayTeamName = game.away_team_name_en || "";
       const matchesSearch =
@@ -293,11 +293,10 @@ export default function Home() {
                             setTimeZone(z.value);
                             setIsDropdownOpen(false);
                           }}
-                          className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between ${
-                            isSelected
-                              ? "bg-amber-500 text-black font-semibold shadow-sm"
-                              : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-[0.99]"
-                          }`}
+                          className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between ${isSelected
+                            ? "bg-amber-500 text-black font-semibold shadow-sm"
+                            : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-[0.99]"
+                            }`}
                         >
                           <span>{z.label}</span>
                           {isSelected && (
@@ -329,11 +328,10 @@ export default function Home() {
         <div className="flex gap-2 overflow-x-auto pb-3 mb-8 custom-scrollbar">
           <button
             onClick={() => setSelectedTab("All Matches")}
-            className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
-              selectedTab === "All Matches"
-                ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
-                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-black dark:text-zinc-400 hover:border-amber-500"
-            }`}
+            className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${selectedTab === "All Matches"
+              ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
+              : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-black dark:text-zinc-400 hover:border-amber-500"
+              }`}
           >
             All Matches
           </button>
@@ -342,11 +340,10 @@ export default function Home() {
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
-                selectedTab === tab
-                  ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
-                  : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
-              }`}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${selectedTab === tab
+                ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
+                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
+                }`}
             >
               {tab}
             </button>
