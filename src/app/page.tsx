@@ -1,219 +1,103 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
-import { StandingsTable } from "@/components/StandingsTable";
+import { useEffect, useMemo, useState } from "react";
 import { MatchCard } from "@/components/MatchCard";
-import { Game } from "@/types/worldcup";
+import { StandingsTable } from "@/components/StandingsTable";
+import { WorldCupMatch } from "@/types/worldcup";
+import { getGroupLetter, getMatchRoundLabel } from "@/lib/utils";
 import logo from "../asset/logo.png";
-
-interface GroupData {
-  name: string;
-  teams: any[];
-}
 
 const TIMEZONES = [
   { value: "Asia/Dhaka", label: "Dhaka (GMT+6)" },
-  { value: "America/New_York", label: "New York (GMT-4)" },
-  { value: "Europe/London", label: "London (GMT+1)" },
-  { value: "Qatar", label: "Qatar (GMT+3)" },
+  { value: "America/New_York", label: "New York" },
+  { value: "Europe/London", label: "London" },
+  { value: "Asia/Qatar", label: "Qatar (GMT+3)" },
 ];
 
-// 1. The master map object is kept outside the component (global scope), so that the reference is never missed during rendering
-const tabApiMap: {
-  [key: string]: { type: "group" | "knockout"; value: string };
-} = {
-  "Group A": { type: "group", value: "A" },
-  "Group B": { type: "group", value: "B" },
-  "Group C": { type: "group", value: "C" },
-  "Group D": { type: "group", value: "D" },
-  "Group E": { type: "group", value: "E" },
-  "Group F": { type: "group", value: "F" },
-  "Group G": { type: "group", value: "G" },
-  "Group H": { type: "group", value: "H" },
-  "Group I": { type: "group", value: "I" },
-  "Group J": { type: "group", value: "J" },
-  "Group K": { type: "group", value: "K" },
-  "Group L": { type: "group", value: "L" },
-  "Round 32": { type: "knockout", value: "r32" },
-  "Round 16": { type: "knockout", value: "r16" },
-  "Quarter Final": { type: "knockout", value: "qf" },
-  "Semi Final": { type: "knockout", value: "sf" },
-  "3RD place": { type: "knockout", value: "third" },
-  FINAL: { type: "knockout", value: "final" },
-};
+const TABS = [
+  { label: "All Matches", round: null },
+  ...Array.from({ length: 12 }, (_, i) => ({
+    label: `Group ${String.fromCharCode(65 + i)}`,
+    round: `First Stage, Group ${String.fromCharCode(65 + i)}`,
+  })),
+  { label: "Round of 32", round: "Round of 32" },
+  { label: "Round of 16", round: "Round of 16" },
+  { label: "Quarter Final", round: "Quarter-final" },
+  { label: "Semi Final", round: "Semi-final" },
+  { label: "3rd Place", round: "Bronze final" },
+  { label: "Final", round: "Final" },
+];
 
 export default function Home() {
-  const [games, setGames] = useState<Game[]>([]);
-  const [groups, setGroups] = useState<GroupData[]>([]);
-  const [allTeams, setAllTeams] = useState<any[]>([]);
+  const [matches, setMatches] = useState<WorldCupMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // dark / light mode state
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme");
-      return savedTheme === "dark";
-    }
-    return false;
-  });
-
-  // match data fetching
   useEffect(() => {
-    // This function will be called as soon as the component is mounted.
-    loadInitialDashboardData();
-  }, []); // Empty dependency array means it runs once on mount
+    const savedTheme = localStorage.getItem("theme");
+    setIsDarkMode(savedTheme === "dark");
 
-  const loadInitialDashboardData = async () => {
-    const CACHE_KEY = "wc_data";
-    const TIME_KEY = "wc_data_time";
-    const CACHE_DURATION = 5 * 60 * 1000; // cash time 5 mins
+    fetch("/data/worldcup-full.json")
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not load World Cup data");
+        return response.json();
+      })
+      .then((data) => setMatches(data.matches ?? []))
+      .catch((error) => console.error(error))
+      .finally(() => setLoading(false));
+  }, []);
 
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    const lastFetchTime = localStorage.getItem(TIME_KEY);
-
-    // 1. Check cash: If there is cash and the time is less than 5 minutes
-    if (cachedData && lastFetchTime) {
-      const isCacheValid = Date.now() - Number(lastFetchTime) < CACHE_DURATION;
-
-      if (isCacheValid) {
-        const { games, groups, teams } = JSON.parse(cachedData);
-        setGames(games);
-        setGroups(groups);
-        setAllTeams(teams);
-        setLoading(false);
-        return; // If it's less than 5 minutes, no need to call the API, just return from here.
-      }
-    }
-
-    // 2. Fetch new data (if there is no cache or 5 minutes have passed)
-    setLoading(true);
-    try {
-      const [gamesRes, groupsRes, teamsRes] = await Promise.all([
-        fetch("/data/games.json"),
-        fetch("/data/groups.json"),
-        fetch("/data/teams.json"),
-      ]);
-
-      const gamesData = await gamesRes.json();
-      const groupsData = await groupsRes.json();
-      const teamsData = await teamsRes.json();
-
-      const dataToSave = {
-        games: gamesData.games,
-        groups: groupsData.groups,
-        teams: teamsData.teams,
-      };
-
-      // 3. Save the new data and current time
-      localStorage.setItem(CACHE_KEY, JSON.stringify(dataToSave));
-      localStorage.setItem(TIME_KEY, String(Date.now()));
-
-      // 4. Update the status
-      setGames(gamesData.games);
-      setGroups(groupsData.groups);
-      setAllTeams(teamsData.teams);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // dark / light mode
-  // save mode states is local storage
   useEffect(() => {
-    const root = window.document.documentElement;
-    if (isDarkMode) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    const root = document.documentElement;
+    root.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
-  //  filtering + Sequential ID Sorting Logic
-  const filteredAndSortedGames = useMemo(() => {
-    // 1. Filter matches by search query and tab
-    const filtered = (games || []).filter((game) => {
-      const homeTeamName = game.home_team_name_en || "";
-      const awayTeamName = game.away_team_name_en || "";
-      const matchesSearch =
-        homeTeamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        awayTeamName.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredMatches = useMemo(() => {
+    const selected = TABS.find((tab) => tab.label === selectedTab);
+    const query = searchQuery.trim().toLowerCase();
 
-      if (!matchesSearch) return false;
-      if (selectedTab === "All Matches") return true;
+    return matches
+      .map((match, index) => ({ match, index }))
+      .filter(({ match }) => {
+        const matchesSearch =
+          !query ||
+          match.team1.toLowerCase().includes(query) ||
+          match.team2.toLowerCase().includes(query) ||
+          match.ground.toLowerCase().includes(query) ||
+          match.round.toLowerCase().includes(query);
 
-      const tabConfig = tabApiMap[selectedTab];
-      if (!tabConfig) return false;
-
-      if (tabConfig.type === "group") {
-        return game.group === tabConfig.value;
-      } else {
-        return (
-          (game.type || "").toLowerCase() === tabConfig.value.toLowerCase()
-        );
-      }
-    });
-
-    // 2. Sorting exactly in ascending order (1, 2, 3... 104) by direct match ID
-    return [...filtered].sort((a, b) => Number(a.id) - Number(b.id));
-  }, [games, selectedTab, searchQuery]);
-
-  // point table control
-  const activeGroupStandings = useMemo(() => {
-    const tabConfig = tabApiMap[selectedTab];
-    if (tabConfig && tabConfig.type === "group") {
-      return groups.find((g) => {
-        if (!g || !g.name) return false;
-
-        const apiGroupName = String(g.name).toLowerCase().trim();
-        const targetValue = String(tabConfig.value).toLowerCase().trim();
-
-        return (
-          apiGroupName === targetValue ||
-          apiGroupName === `group ${targetValue}`
-        );
+        const matchesTab = !selected?.round || match.round === selected.round;
+        return matchesSearch && matchesTab;
       });
-    }
-    return undefined;
-  }, [groups, selectedTab]);
+  }, [matches, searchQuery, selectedTab]);
+
+  const selectedGroup = getGroupLetter(
+    TABS.find((tab) => tab.label === selectedTab)?.round ?? ""
+  );
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors pb-20">
-      {/* Navigation Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-zinc-50 pb-20 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-50">
+      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="relative w-14 h-14 flex-shrink-0">
-              <Image
-                src={logo}
-                alt="FIFA World Cup 2026 Logo"
-                fill
-                className="object-contain"
-                priority
-                unoptimized
-              />
+            <div className="relative h-14 w-14 shrink-0">
+              <Image src={logo} alt="FIFA World Cup 2026 Logo" fill className="object-contain" priority unoptimized />
             </div>
-
-            <div className="flex flex-col justify-center">
-              <h1 className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
-                WORLD CUP 2026
-              </h1>
-
-              <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 mt-0.5 select-none">
-                Developed by
+            <div>
+              <h1 className="text-xl font-black tracking-tight">WORLD CUP 2026</h1>
+              <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
+                Developed by{" "}
                 <a
                   href="https://www.linkedin.com/in/abdur-rashid-sawom-3379a0262/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-bold text-black mx-3 dark:text-amber-400 hover:underline hover:text-amber-600 transition-all cursor-pointer"
+                  className="font-bold text-zinc-900 hover:text-amber-600 hover:underline dark:text-amber-400"
                 >
                   Abdur Rashid Sawom
                 </a>
@@ -222,156 +106,125 @@ export default function Home() {
           </div>
 
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="px-4 py-2 text-xs font-bold rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700"
+            onClick={() => setIsDarkMode((value) => !value)}
+            className="rounded-xl border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-bold transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
           >
             {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 pt-8">
-        <p className="mb-6 text-center text-[18px] font-bold">
-          June 11 - July 19, 2026
-        </p>
+      <main className="mx-auto max-w-7xl px-4 pt-8">
+        <div className="mb-7 text-center">
+          <p className="text-lg font-black">June 11 – July 19, 2026</p>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            104 matches • Full match details from the local dataset
+          </p>
+        </div>
 
-        {/* Search & Filter Section */}
-        <div className="mb-8 flex flex-col md:flex-row gap-4 items-center">
-          {/* 1. search */}
-          <div className="relative w-full md:w-96">
+        <section className="mb-7 flex flex-col items-center gap-3 md:flex-row">
+          <div className="w-full md:max-w-md">
             <input
-              type="text"
-              placeholder="Search team..."
+              type="search"
+              placeholder="Search team, stadium or round..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-4 pr-10 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-amber-500 outline-none transition-all shadow-sm text-zinc-900 dark:text-white"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-900"
             />
           </div>
 
-          {/* dropdown menu */}
           <div className="relative w-full md:w-64">
             <button
               type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full pl-4 pr-10 py-3 text-left rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 outline-none text-sm cursor-pointer shadow-sm text-zinc-900 dark:text-white focus:ring-2 focus:ring-amber-500 transition-all flex justify-between items-center"
+              onClick={() => setIsDropdownOpen((value) => !value)}
+              className="flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
             >
-              <span>
-                {TIMEZONES.find((z) => z.value === timeZone)?.label ||
-                  "Select Timezone"}
-              </span>
-              <svg
-                className={`w-4 h-4 text-zinc-400 dark:text-zinc-500 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              {TIMEZONES.find((zone) => zone.value === timeZone)?.label}
+              <span className={isDropdownOpen ? "rotate-180" : ""}>⌄</span>
             </button>
 
             {isDropdownOpen && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
+                <button
+                  aria-label="Close timezone menu"
+                  className="fixed inset-0 z-10 h-full w-full cursor-default"
                   onClick={() => setIsDropdownOpen(false)}
                 />
-
-                <div className="absolute z-20 w-full mt-2 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="p-1 flex flex-col gap-1">
-                    {TIMEZONES.map((z) => {
-                      const isSelected = z.value === timeZone;
-                      return (
-                        <button
-                          key={z.value}
-                          type="button"
-                          onClick={() => {
-                            setTimeZone(z.value);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between ${isSelected
-                            ? "bg-amber-500 text-black font-semibold shadow-sm"
-                            : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-[0.99]"
-                            }`}
-                        >
-                          <span>{z.label}</span>
-                          {isSelected && (
-                            <svg
-                              className="w-4 h-4 text-black"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2.5"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white p-1 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+                  {TIMEZONES.map((zone) => (
+                    <button
+                      key={zone.value}
+                      onClick={() => {
+                        setTimeZone(zone.value);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full rounded-xl px-3 py-2.5 text-left text-sm ${timeZone === zone.value
+                          ? "bg-amber-500 font-bold text-black"
+                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                    >
+                      {zone.label}
+                    </button>
+                  ))}
                 </div>
               </>
             )}
           </div>
-        </div>
+        </section>
 
-        {/* Tab Navigation Menu */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-8 custom-scrollbar">
-          <button
-            onClick={() => setSelectedTab("All Matches")}
-            className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${selectedTab === "All Matches"
-              ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
-              : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-black dark:text-zinc-400 hover:border-amber-500"
-              }`}
-          >
-            All Matches
-          </button>
-
-          {Object.keys(tabApiMap).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${selectedTab === tab
-                ? "bg-amber-500 border-amber-500 text-black shadow-md scale-105"
-                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:border-amber-500"
-                }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="mb-8 overflow-x-auto pb-2">
+          <div className="flex min-w-max gap-2">
+            {TABS.map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => setSelectedTab(tab.label)}
+                className={`rounded-full border px-5 py-2.5 text-xs font-bold transition ${selectedTab === tab.label
+                    ? "border-amber-500 bg-amber-500 text-black shadow-md"
+                    : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+                  }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-zinc-400 font-medium">Loading Data...</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
+            <p className="mt-4 text-sm font-medium text-zinc-400">Loading World Cup data...</p>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* table rendering section */}
-            {activeGroupStandings && (
-              <StandingsTable
-                teams={activeGroupStandings.teams}
-                groupName={activeGroupStandings.name}
-                allTeamsData={allTeams}
-              />
-            )}
+          <>
+            {selectedGroup && <StandingsTable matches={matches} group={selectedGroup} />}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-              {filteredAndSortedGames.map((game) => (
-                <MatchCard key={game.id} game={game} timeZone={timeZone} />
-              ))}
+            <div className="mb-4 flex items-end justify-between">
+              <div>
+                <h2 className="text-xl font-black">{getMatchRoundLabel(TABS.find((tab) => tab.label === selectedTab)?.round ?? "All Matches")}</h2>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {filteredMatches.length} match{filteredMatches.length === 1 ? "" : "es"} found
+                </p>
+              </div>
             </div>
-          </div>
+
+            {filteredMatches.length ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredMatches.map(({ match, index }) => (
+                  <MatchCard
+                    key={`${match.date}-${match.team1}-${match.team2}`}
+                    match={match}
+                    matchIndex={index}
+                    timeZone={timeZone}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-zinc-300 py-20 text-center dark:border-zinc-700">
+                <p className="font-bold">No matches found</p>
+                <p className="mt-1 text-sm text-zinc-500">Try another team or round.</p>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

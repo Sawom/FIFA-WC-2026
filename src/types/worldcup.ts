@@ -1,37 +1,58 @@
-export interface Game {
-  _id: string;
-  id: string;
-  home_team_id: string;
-  away_team_id: string;
-  home_score: string;
-  away_score: string;
-  home_scorers: string;
-  away_scorers: string;
-  group: string;
-  matchday: string;
-  local_date: string;
-  finished: string;
-  time_elapsed: string;
-  type: string;
-  home_team_name_en: string;
-  away_team_name_en: string;
-  stadium_id: string;
-}
-
-export interface GroupTeam {
-  team_id: string;
-  mp: string;
-  w: string;
-  l: string;
-  d: string;
-  pts: string;
-  gf: string;
-  ga: string;
-  gd: string;
-}
-
-export interface GroupData {
-  _id: string;
+export interface Player {
   name: string;
-  teams: GroupTeam[];
+  captain?: boolean;
+}
+
+export interface Goal {
+  name: string;
+  minute: string;
+  penalty?: boolean;
+  owngoal?: boolean;
+}
+
+export interface Substitution {
+  on: string;
+  off: string;
+  minute: string;
+}
+
+export interface Booking {
+  type: "Y" | "R" | string;
+  name: string;
+  minute: string;
+}
+
+export interface Lineup {
+  starter: Player[];
+  bench: Player[];
+  subs: Substitution[];
+}
+
+export interface Referee {
+  name: string;
+  country: string;
+}
+
+export interface WorldCupMatch {
+  round: string;
+  date: string;
+  time: string;
+  team1: string;
+  team2: string;
+  score: {
+    ft: [number, number];
+    ht: [number, number];
+  };
+  goals1: Goal[];
+  goals2: Goal[];
+  ground: string;
+  attendance: number;
+  lineup: [Lineup, Lineup];
+  bookings: [Booking[], Booking[]];
+  referees: Referee[];
+}
+
+export interface WorldCupData {
+  name: string;
+  matches: WorldCupMatch[];
 }
