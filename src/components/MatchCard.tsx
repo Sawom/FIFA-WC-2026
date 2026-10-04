@@ -105,8 +105,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
    * it is not part of the actual match score.
    */
   const finalScore = Array.isArray(match.score.et)
-    ? match.score.et
-    : match.score.ft;
+    ? match.score.et : match.score.ft;
 
   const [homeScore, awayScore] = finalScore;
 
