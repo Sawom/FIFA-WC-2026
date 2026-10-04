@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import React from "react";
 import { WorldCupMatch } from "@/types/worldcup";
@@ -35,7 +36,9 @@ function Scorers({
           className="flex items-center justify-center gap-1.5 text-center text-[10px] font-medium text-zinc-500 dark:text-zinc-400"
         >
           <span>⚽</span>
+
           <span className="truncate">{goal.name}</span>
+
           <span className="shrink-0 text-amber-600 dark:text-amber-400">
             {goal.minute}&apos;
           </span>
@@ -60,7 +63,11 @@ function TeamSide({
     <div className="flex min-w-0 flex-1 flex-col items-center text-center">
       <div className="flex h-12 w-16 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
         {flag ? (
-          <img src={flag} alt={`${team} flag`} className="h-full w-full object-cover" />
+          <img
+            src={flag}
+            alt={`${team} flag`}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span className="text-xl">🏳️</span>
         )}
@@ -85,7 +92,26 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   timeZone,
 }) => {
   const id = getMatchId(match, matchIndex);
-  const [homeScore, awayScore] = match.score.ft;
+
+  /*
+   * score.ft = score after 90 minutes
+   * score.et = final score after extra time
+   *
+   * So:
+   * - Normal match -> use FT
+   * - Extra-time match -> use ET
+   *
+   * Penalty shootout (score.p) is kept separate because
+   * it is not part of the actual match score.
+   */
+  const finalScore = Array.isArray(match.score.et)
+    ? match.score.et
+    : match.score.ft;
+
+  const [homeScore, awayScore] = finalScore;
+
+  const hasExtraTime = Array.isArray(match.score.et);
+  const hasPenaltyShootout = Array.isArray(match.score.p);
 
   return (
     <Link
@@ -97,20 +123,46 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-amber-600 dark:bg-zinc-800 dark:text-amber-400">
             Match #{id}
           </span>
-          <span className="truncate">{getMatchRoundLabel(match.round)}</span>
+
+          <span className="truncate">
+            {getMatchRoundLabel(match.round)}
+          </span>
         </div>
 
         <div className="my-5 flex items-start justify-between gap-3">
-          <TeamSide team={match.team1} score={homeScore} goals={match.goals1} />
+          <TeamSide
+            team={match.team1}
+            score={homeScore}
+            goals={match.goals1}
+          />
 
           <div className="flex shrink-0 flex-col items-center pt-10">
-            <span className="text-xs font-black text-zinc-400">FT</span>
+            <span className="text-xs font-black text-zinc-400">
+              {hasExtraTime ? "ET" : "FT"}
+            </span>
+
             <span className="mt-1 text-[10px] font-medium text-zinc-400">
               HT {match.score.ht[0]}–{match.score.ht[1]}
             </span>
+
+            {hasExtraTime && (
+              <span className="mt-1 text-[9px] font-semibold text-amber-600 dark:text-amber-400">
+                After Extra Time
+              </span>
+            )}
+
+            {hasPenaltyShootout && Array.isArray(match.score.p) && (
+              <span className="mt-1 text-[9px] font-semibold text-zinc-500 dark:text-zinc-400">
+                PEN {match.score.p[0]}–{match.score.p[1]}
+              </span>
+            )}
           </div>
 
-          <TeamSide team={match.team2} score={awayScore} goals={match.goals2} />
+          <TeamSide
+            team={match.team2}
+            score={awayScore}
+            goals={match.goals2}
+          />
         </div>
 
         <div className="space-y-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
@@ -118,13 +170,18 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             <span className="font-semibold text-zinc-700 dark:text-zinc-200">
               {formatKickoff(match.date, match.time, timeZone)}
             </span>
+
             <span className="shrink-0 rounded-lg bg-zinc-100 px-2 py-1 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
               Details →
             </span>
           </div>
-          <p className="truncate text-[11px] text-zinc-400">🏟️ {match.ground}</p>
+
+          <p className="truncate text-[11px] text-zinc-400">
+            🏟️ {match.ground}
+          </p>
         </div>
       </article>
     </Link>
   );
 };
+

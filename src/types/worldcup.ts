@@ -42,6 +42,8 @@ export interface WorldCupMatch {
   score: {
     ft: [number, number];
     ht: [number, number];
+    et: [number, number];
+    p: [number, number];
   };
   goals1: Goal[];
   goals2: Goal[];
