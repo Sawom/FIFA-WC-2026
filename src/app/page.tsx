@@ -94,9 +94,9 @@ export default function Home() {
     setLoading(true);
     try {
       const [gamesRes, groupsRes, teamsRes] = await Promise.all([
-        fetch("https://worldcup26.ir/get/games"),
-        fetch("https://worldcup26.ir/get/groups"),
-        fetch("https://worldcup26.ir/get/teams"),
+        fetch("/data/games.json"),
+        fetch("/data/groups.json"),
+        fetch("/data/teams.json"),
       ]);
 
       const gamesData = await gamesRes.json();
