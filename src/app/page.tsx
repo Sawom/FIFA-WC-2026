@@ -6,7 +6,7 @@ import { MatchCard } from "@/components/MatchCard";
 import { StandingsTable } from "@/components/StandingsTable";
 import WorldCupBracketModal from "@/components/WorldCupBracketModal";
 import { WorldCupMatch } from "@/types/worldcup";
-import { getGroupLetter, getMatchRoundLabel } from "@/lib/utils";
+import { getFlagUrl, getGroupLetter, getMatchRoundLabel } from "@/lib/utils";
 import logo from "../asset/logo.png";
 
 const TIMEZONES = [
@@ -29,6 +29,29 @@ const TABS = [
   { label: "3rd Place", round: "Bronze final" },
   { label: "Final", round: "Final" },
 ];
+
+// TeamFlag component import or define koro:
+function TeamFlag({ team }: { team: string }) {
+  const flag = getFlagUrl(team);
+
+  if (!flag) {
+    return (
+      <div className="flex h-6 w-9 shrink-0 items-center justify-center rounded bg-zinc-100 text-xs dark:bg-zinc-800">
+        🏳️
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={flag}
+      alt={`${team} flag`}
+      className="h-6 w-9 shrink-0 rounded object-cover shadow-sm"
+    />
+  );
+}
+
+
 
 export default function Home() {
   const [matches, setMatches] = useState<WorldCupMatch[]>([]);
@@ -118,9 +141,32 @@ export default function Home() {
 
       <main className="mx-auto max-w-7xl px-4 pt-8">
         <div className="mb-7 text-center">
-          <p className="text-lg font-black">June 11 – July 19, 2026</p>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            104 matches • Full match details from the local dataset
+          {/* Animated Champion Badge */}
+          <div className="mb-4 inline-flex items-center justify-center gap-3 rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500/10 via-amber-400/20 to-amber-500/10 px-6 py-3 shadow-lg shadow-amber-500/5 backdrop-blur-sm dark:border-amber-500/30 dark:from-amber-500/20 dark:to-amber-500/20">
+            {/* Trophy with Pulse & Bounce Animation */}
+            <span className="animate-bounce text-2xl md:text-3xl">🏆</span>
+
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 md:text-base">
+                Champion:
+              </span>
+
+              {/* Spain Flag */}
+              <TeamFlag team="Spain" />
+
+              {/* Glowing / Animated Text */}
+              <span className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-clip-text text-xl font-black text-transparent animate-pulse dark:from-amber-300 dark:via-yellow-200 dark:to-amber-300 md:text-2xl">
+                Spain
+              </span>
+            </div>
+
+            {/* Celebratory Sparkles / Confetti Emoji */}
+            <span className="animate-pulse text-2xl md:text-3xl">🎉</span>
+          </div>
+
+          <p className="text-xl font-black">June 11 – July 19, 2026</p>
+          <p className="mt-1 text-s text-zinc-500 dark:text-zinc-400">
+            104 matches • Full match details
           </p>
         </div>
 
@@ -131,7 +177,7 @@ export default function Home() {
               placeholder="Search team, stadium or round..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-900"
+              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-900"
             />
           </div>
 
@@ -139,7 +185,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setIsDropdownOpen((value) => !value)}
-              className="flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
             >
               {TIMEZONES.find((zone) => zone.value === timeZone)?.label}
               <span className={isDropdownOpen ? "rotate-180" : ""}>⌄</span>
@@ -152,7 +198,7 @@ export default function Home() {
                   className="fixed inset-0 z-10 h-full w-full cursor-default"
                   onClick={() => setIsDropdownOpen(false)}
                 />
-                <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white p-1 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white p-1 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
                   {TIMEZONES.map((zone) => (
                     <button
                       key={zone.value}
@@ -180,7 +226,7 @@ export default function Home() {
               <button
                 key={tab.label}
                 onClick={() => setSelectedTab(tab.label)}
-                className={`rounded-full border px-5 py-2.5 text-xs font-bold transition ${selectedTab === tab.label
+                className={`rounded-full cursor-pointer border px-5 py-2.5 text-xs font-bold transition ${selectedTab === tab.label
                   ? "border-amber-500 bg-amber-500 text-black shadow-md"
                   : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
                   }`}
@@ -208,7 +254,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <button onClick={() => setBracketOpen(true)} className="rounded-xl bg-amber-500 px-4 py-2 font-bold text-black" > Bracket </button>
+              <button onClick={() => setBracketOpen(true)} className="rounded-xl bg-amber-500 cursor-pointer px-4 py-2 font-bold text-black" > View Bracket </button>
 
               <WorldCupBracketModal open={bracketOpen} onClose={() => setBracketOpen(false)} />
             </div>
@@ -225,7 +271,7 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-3xl border border-dashed border-zinc-300 py-20 text-center dark:border-zinc-700">
+              <div className="rounded-xl border border-dashed border-zinc-300 py-20 text-center dark:border-zinc-700">
                 <p className="font-bold">No matches found</p>
                 <p className="mt-1 text-sm text-zinc-500">Try another team or round.</p>
               </div>

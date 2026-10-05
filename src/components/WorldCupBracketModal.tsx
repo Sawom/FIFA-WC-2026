@@ -556,7 +556,7 @@ export default function WorldCupBracketModal({
                     max-w-[1850px]
                     flex-col
                     overflow-hidden
-                    rounded-[2rem]
+                    rounded-[1rem]
                     border
                     border-zinc-200
                     bg-zinc-50
@@ -605,6 +605,7 @@ export default function WorldCupBracketModal({
                             w-10
                             items-center
                             justify-center
+                            cursor-pointer
                             rounded-xl
                             border
                             border-zinc-200
@@ -686,7 +687,7 @@ export default function WorldCupBracketModal({
 
                                     {/* FINAL */}
                                     <div
-                                        className="relative shrink-0"
+                                        className="relative shrink-0 mr-8"
                                         style={{
                                             width: 270,
                                             height: TOTAL_ROWS * ROW_HEIGHT,
@@ -714,25 +715,37 @@ export default function WorldCupBracketModal({
                                             </div>
 
                                             {/* Champion */}
-                                            {bracket.final[0] && (
-                                                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-center dark:border-amber-900/60 dark:bg-amber-950/30">
-                                                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-400">
-                                                        Champion
-                                                    </p>
+                                            {bracket.final[0] && (() => {
+                                                const finalMatch = matches.find((m) => m.round === "Final");
+                                                const winnerName = finalMatch ? getWinner(finalMatch) : null;
 
-                                                    <p className="mt-1 text-sm font-black text-zinc-900 dark:text-white">
-                                                        {bracket.final[0].score1 !==
-                                                            null &&
-                                                            bracket.final[0].score2 !==
-                                                            null
-                                                            ? bracket.final[0].score1 >
-                                                                bracket.final[0].score2
-                                                                ? bracket.final[0].team1
-                                                                : bracket.final[0].team2
-                                                            : "—"}
-                                                    </p>
-                                                </div>
-                                            )}
+                                                return (
+                                                    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-center shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30">
+                                                        <div className="flex items-center justify-center gap-1.5">
+                                                            <span className="text-base">🏆</span>
+                                                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-400">
+                                                                Champion
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="mt-2 flex items-center justify-center gap-2">
+                                                            {winnerName ? (
+                                                                <>
+                                                                    <TeamFlag team={winnerName} />
+                                                                    <span className="text-base font-black text-zinc-900 dark:text-white">
+                                                                        {winnerName}
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <span className="text-base font-black text-zinc-400">
+                                                                    —
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+
                                         </div>
                                     </div>
                                 </div>
