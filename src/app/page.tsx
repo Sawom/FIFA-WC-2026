@@ -52,7 +52,6 @@ function TeamFlag({ team }: { team: string }) {
 }
 
 
-
 export default function Home() {
   const [matches, setMatches] = useState<WorldCupMatch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,12 +59,12 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // const [isDarkMode, setIsDarkMode] = useState(false);
   const [bracketOpen, setBracketOpen] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    setIsDarkMode(savedTheme === "dark");
+    // const savedTheme = localStorage.getItem("theme");
+    // setIsDarkMode(savedTheme === "dark");
 
     fetch("/data/worldcup-full.json")
       .then((response) => {
@@ -77,11 +76,6 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", isDarkMode);
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
 
   const filteredMatches = useMemo(() => {
     const selected = TABS.find((tab) => tab.label === selectedTab);
@@ -108,37 +102,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-20 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-50">
-      {/* header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="relative h-14 w-14 shrink-0">
-              <Image src={logo} alt="FIFA World Cup 2026 Logo" fill className="object-contain" priority unoptimized />
-            </div>
-            <div>
-              <h1 className="text-xl font-black tracking-tight">WORLD CUP 2026</h1>
-              <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
-                Developed by{" "}
-                <a
-                  href="https://www.linkedin.com/in/abdur-rashid-sawom-3379a0262/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-bold text-zinc-900 hover:text-amber-600 hover:underline dark:text-amber-400"
-                >
-                  Abdur Rashid Sawom
-                </a>
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setIsDarkMode((value) => !value)}
-            className="rounded-xl border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-bold transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-          >
-            {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
-        </div>
-      </header>
 
       <main className="mx-auto max-w-7xl px-4 pt-8">
         <div className="mb-7 text-center">
