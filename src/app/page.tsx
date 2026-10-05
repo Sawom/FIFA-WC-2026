@@ -59,13 +59,9 @@ export default function Home() {
   const [selectedTab, setSelectedTab] = useState("All Matches");
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // const [isDarkMode, setIsDarkMode] = useState(false);
   const [bracketOpen, setBracketOpen] = useState(false);
 
   useEffect(() => {
-    // const savedTheme = localStorage.getItem("theme");
-    // setIsDarkMode(savedTheme === "dark");
-
     fetch("/data/worldcup-full.json")
       .then((response) => {
         if (!response.ok) throw new Error("Could not load World Cup data");
@@ -190,7 +186,7 @@ export default function Home() {
               <button
                 key={tab.label}
                 onClick={() => setSelectedTab(tab.label)}
-                className={`rounded-full cursor-pointer border px-5 py-2.5 text-xs font-bold transition ${selectedTab === tab.label
+                className={`rounded cursor-pointer whitespace-nowrap shrink-0 border px-5 py-2.5 text-sm font-bold transition ${selectedTab === tab.label
                   ? "border-amber-500 bg-amber-500 text-black shadow-md"
                   : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
                   }`}

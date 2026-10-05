@@ -218,16 +218,15 @@ export default function PlayersPage() {
 
                         <div className="flex gap-2 overflow-x-auto pb-1">
                             {groups.map((group) => {
-                                const active = selectedGroup === group;
-
+                               
                                 return (
                                     <button
                                         key={group}
                                         type="button"
                                         onClick={() => setSelectedGroup(group)}
-                                        className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition ${active
-                                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                                            : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                                        className={`cursor-pointer whitespace-nowrap shrink-0 rounded border px-5 py-2.5 text-sm font-bold transition ${selectedGroup === group
+                                            ? "border-amber-500 bg-amber-500 text-black shadow-md"
+                                            : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
                                             }`}
                                     >
                                         {group === "All" ? "All Groups" : `Group ${group}`}

@@ -51,7 +51,7 @@ export default function Header() {
                 {mounted && (
                     <button
                         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="rounded-xl border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-bold transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+                        className="rounded-xl cursor-pointer border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-bold transition hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
                     >
                         {theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
                     </button>
