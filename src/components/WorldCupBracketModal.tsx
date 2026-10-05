@@ -18,7 +18,7 @@ type BracketMatch = {
     penalty?: [number, number];
 };
 
-const ROW_HEIGHT = 104;
+const ROW_HEIGHT = 124;
 const CARD_HEIGHT = 110;
 const CONNECTOR_WIDTH = 56;
 const TOTAL_ROWS = 16;
@@ -185,7 +185,7 @@ function TeamFlag({ team }: { team: string }) {
 
     if (!flag) {
         return (
-            <div className="flex h-7 w-9 shrink-0 items-center justify-center rounded bg-zinc-100 text-xs dark:bg-zinc-800">
+            <div className="flex h-7 w-9 shrink-0 items-center justify-center rounded bg-zinc-100 text-sm dark:bg-zinc-800">
                 🏳️
             </div>
         );
@@ -258,7 +258,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
                         <span
                             className={`
                                 truncate
-                                text-xs
+                                text-sm
                                 ${winner === 1
                                     ? "font-black text-zinc-950 dark:text-white"
                                     : "font-medium text-zinc-700 dark:text-zinc-300"
@@ -271,7 +271,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
 
                     <span
                         className={`
-                            text-xs
+                            text-sm
                             ${winner === 1
                                 ? "font-black text-amber-600 dark:text-amber-400"
                                 : "font-bold text-zinc-700 dark:text-zinc-300"
@@ -301,7 +301,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
                         <span
                             className={`
                                 truncate
-                                text-xs
+                                text-sm
                                 ${winner === 2
                                     ? "font-black text-zinc-950 dark:text-white"
                                     : "font-medium text-zinc-700 dark:text-zinc-300"
@@ -314,7 +314,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
 
                     <span
                         className={`
-                            text-xs
+                            text-sm
                             ${winner === 2
                                 ? "font-black text-amber-600 dark:text-amber-400"
                                 : "font-bold text-zinc-700 dark:text-zinc-300"
@@ -324,7 +324,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
                         {match.score2 ?? "–"}
                     </span>
                 </div>
-                
+
             </div>
 
             {/* Penalty Tag - Cleanly integrated at the bottom without overlap */}
@@ -335,7 +335,7 @@ function MatchBox({ match }: { match: BracketMatch }) {
                 </div>
             )}
         </div>
-        
+
     );
 }
 
@@ -414,7 +414,7 @@ function BracketColumn({
             }}
         >
             <div className="absolute -top-10 left-0 right-0 text-center">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                <h3 className="text-[12px] font-black uppercase tracking-[0.18em] text-zinc-600 dark:text-zinc-400">
                     {title}
                 </h3>
             </div>
@@ -590,7 +590,7 @@ export default function WorldCupBracketModal({
                             <h2 className="text-xl font-black text-zinc-900 dark:text-white md:text-2xl">
                                 World Cup 2026
                             </h2>
-                            <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                            <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
                                 Knockout Stage Bracket
                             </p>
                         </div>
@@ -716,7 +716,7 @@ export default function WorldCupBracketModal({
                                             {/* Champion */}
                                             {bracket.final[0] && (
                                                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-center dark:border-amber-900/60 dark:bg-amber-950/30">
-                                                    <p className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-400">
+                                                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-400">
                                                         Champion
                                                     </p>
 
