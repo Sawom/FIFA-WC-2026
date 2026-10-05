@@ -1,7 +1,6 @@
-
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
+import { getFlagUrl } from "@/lib/utils";
 
 type Player = {
     number: number;
@@ -27,64 +26,6 @@ const positionLabels: Record<Player["pos"], string> = {
     MF: "Midfielder",
     FW: "Forward",
 };
-
-
-function getFlagUrl(code: string) {
-    const flagCodes: Record<string, string> = {
-        ARG: "ar",
-        AUS: "au",
-        AUT: "at",
-        BEL: "be",
-        BRA: "br",
-        CAN: "ca",
-        COL: "co",
-        CRC: "cr",
-        CRO: "hr",
-        CZE: "cz",
-        DEN: "dk",
-        ECU: "ec",
-        EGY: "eg",
-        ENG: "gb-eng",
-        FRA: "fr",
-        GER: "de",
-        GHA: "gh",
-        HAI: "ht",
-        IRN: "ir",
-        JPN: "jp",
-        KOR: "kr",
-        KSA: "sa",
-        MEX: "mx",
-        MAR: "ma",
-        NED: "nl",
-        NZL: "nz",
-        NGA: "ng",
-        PAN: "pa",
-        PAR: "py",
-        PER: "pe",
-        POL: "pl",
-        POR: "pt",
-        QAT: "qa",
-        SCO: "gb-sct",
-        SEN: "sn",
-        SRB: "rs",
-        SUI: "ch",
-        TUN: "tn",
-        URU: "uy",
-        USA: "us",
-        WAL: "gb-wls",
-    };
-
-    const countryCode = flagCodes[code.toUpperCase()];
-
-    // Never return an empty string
-    if (!countryCode) {
-        return null;
-    }
-
-    return `https://flagcdn.com/w80/${countryCode}.png`;
-}
-
-
 
 function calculateAge(dateOfBirth: string) {
     const birthDate = new Date(dateOfBirth);
@@ -360,7 +301,7 @@ export default function PlayersPage() {
                                         <div className="flex items-center gap-4">
                                             <div className="flex h-14 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                                                 <img
-                                                    src={getFlagUrl(squad.fifa_code) ?? undefined}
+                                                    src={getFlagUrl(squad.name) ?? undefined}
                                                     alt={`${squad.name} flag`}
                                                     className="max-h-full max-w-full object-contain"
                                                     onError={(e) => {
