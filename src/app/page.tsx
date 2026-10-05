@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { MatchCard } from "@/components/MatchCard";
 import { StandingsTable } from "@/components/StandingsTable";
+import WorldCupBracketModal from "@/components/WorldCupBracketModal";
 import { WorldCupMatch } from "@/types/worldcup";
 import { getGroupLetter, getMatchRoundLabel } from "@/lib/utils";
 import logo from "../asset/logo.png";
@@ -37,6 +38,7 @@ export default function Home() {
   const [timeZone, setTimeZone] = useState("Asia/Dhaka");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [bracketOpen, setBracketOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -159,8 +161,8 @@ export default function Home() {
                         setIsDropdownOpen(false);
                       }}
                       className={`w-full rounded-xl px-3 py-2.5 text-left text-sm ${timeZone === zone.value
-                          ? "bg-amber-500 font-bold text-black"
-                          : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        ? "bg-amber-500 font-bold text-black"
+                        : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         }`}
                     >
                       {zone.label}
@@ -179,8 +181,8 @@ export default function Home() {
                 key={tab.label}
                 onClick={() => setSelectedTab(tab.label)}
                 className={`rounded-full border px-5 py-2.5 text-xs font-bold transition ${selectedTab === tab.label
-                    ? "border-amber-500 bg-amber-500 text-black shadow-md"
-                    : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+                  ? "border-amber-500 bg-amber-500 text-black shadow-md"
+                  : "border-zinc-200 bg-white text-zinc-500 hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
                   }`}
               >
                 {tab.label}
@@ -205,6 +207,10 @@ export default function Home() {
                   {filteredMatches.length} match{filteredMatches.length === 1 ? "" : "es"} found
                 </p>
               </div>
+
+              <button onClick={() => setBracketOpen(true)} className="rounded-xl bg-amber-500 px-4 py-2 font-bold text-black" > Bracket </button>
+
+              <WorldCupBracketModal open={bracketOpen} onClose={() => setBracketOpen(false)} />
             </div>
 
             {filteredMatches.length ? (
