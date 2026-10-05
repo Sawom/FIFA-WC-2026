@@ -142,12 +142,12 @@ export default function Home() {
       <main className="mx-auto max-w-7xl px-4 pt-8">
         <div className="mb-7 text-center">
           {/* Animated Champion Badge */}
-          <div className="mb-4 inline-flex items-center justify-center gap-3 rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500/10 via-amber-400/20 to-amber-500/10 px-6 py-3 shadow-lg shadow-amber-500/5 backdrop-blur-sm dark:border-amber-500/30 dark:from-amber-500/20 dark:to-amber-500/20">
+          <div className="mb-4 inline-flex items-center  justify-center gap-3 rounded-2xl border border-amber-300/60  via-amber-400/20 to-amber-500/10 px-6 py-3 shadow-lg shadow-amber-500/5 backdrop-blur-sm dark:border-amber-500/30 dark:from-amber-500/20 dark:to-amber-500/20">
             {/* Trophy with Pulse & Bounce Animation */}
             <span className="animate-bounce text-2xl md:text-3xl">🏆</span>
 
             <div className="flex items-center gap-2.5">
-              <span className="text-sm font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 md:text-base">
+              <span className="text-xl font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 md:text-base">
                 Champion:
               </span>
 
@@ -155,7 +155,7 @@ export default function Home() {
               <TeamFlag team="Spain" />
 
               {/* Glowing / Animated Text */}
-              <span className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-clip-text text-xl font-black text-transparent animate-pulse dark:from-amber-300 dark:via-yellow-200 dark:to-amber-300 md:text-2xl">
+              <span className=" text-amber-600 bg-clip-text text-xl font-black  dark:text-amber-400 md:text-2xl">
                 Spain
               </span>
             </div>
