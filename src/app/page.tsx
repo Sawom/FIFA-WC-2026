@@ -131,13 +131,17 @@ export default function Home() {
         </div>
 
         <section className="mb-7 flex flex-col items-center gap-3 md:flex-row">
-          <div className="w-full md:max-w-md">
+          <div className="w-full md:max-w-md relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              🔍
+            </span>
+
             <input
               type="search"
               placeholder="Search team, stadium or round..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-500 dark:border-zinc-800 dark:bg-zinc-900"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400  focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:placeholder:text-slate-500"
             />
           </div>
 

@@ -190,14 +190,8 @@ export default function PlayersPage() {
                 {/* Search + Groups */}
                 <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div className="mb-4">
-                        <label
-                            htmlFor="player-search"
-                            className="mb-2 block text-sm font-semibold"
-                        >
-                            Search
-                        </label>
 
-                        <div className="relative">
+                        <div className=" w-full md:max-w-md relative">
                             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                                 🔍
                             </span>
@@ -208,7 +202,7 @@ export default function PlayersPage() {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search country, player or club..."
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400  focus:ring-2 focus:ring-amber-500 dark:border-slate-700 dark:bg-slate-800 dark:placeholder:text-slate-500"
                             />
                         </div>
                     </div>
@@ -218,7 +212,7 @@ export default function PlayersPage() {
 
                         <div className="flex gap-2 overflow-x-auto pb-1">
                             {groups.map((group) => {
-                               
+
                                 return (
                                     <button
                                         key={group}
