@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { MatchCard } from "@/components/MatchCard";
 import { StandingsTable } from "@/components/StandingsTable";
 import WorldCupBracketModal from "@/components/WorldCupBracketModal";
 import { WorldCupMatch } from "@/types/worldcup";
 import { getFlagUrl, getGroupLetter, getMatchRoundLabel } from "@/lib/utils";
-import logo from "../asset/logo.png";
+import Link from "next/link";
 
 const TIMEZONES = [
   { value: "Asia/Dhaka", label: "Dhaka (GMT+6)" },
@@ -218,7 +217,11 @@ export default function Home() {
                 </p>
               </div>
 
-              <button onClick={() => setBracketOpen(true)} className="rounded-xl bg-amber-500 cursor-pointer px-4 py-2 font-bold text-black" > View Bracket </button>
+              <Link href='/players' >
+                <button className="rounded-xl bg-amber-500 cursor-pointer px-4 py-2 font-bold text-black" > Players </button>
+              </Link>
+
+              <button onClick={() => setBracketOpen(true)} className="rounded-xl bg-amber-500 cursor-pointer px-4 py-2 font-bold text-black" > Bracket </button>
 
               <WorldCupBracketModal open={bracketOpen} onClose={() => setBracketOpen(false)} />
             </div>
