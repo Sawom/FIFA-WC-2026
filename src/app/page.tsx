@@ -98,7 +98,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 pb-20 text-zinc-900 transition-colors dark:bg-zinc-950 dark:text-zinc-50">
 
-      <main className="mx-auto max-w-7xl px-4 pt-8">
+      <main className="mx-auto max-w-[98%] px-2 pt-8">
         <div className="mb-7 text-center">
           {/* Animated Champion Badge */}
           <div className="mb-4 inline-flex items-center  justify-center gap-3 rounded-2xl border border-amber-300/60  via-amber-400/20 to-amber-500/10 px-6 py-3 shadow-lg shadow-amber-500/5 backdrop-blur-sm dark:border-amber-500/30 dark:from-amber-500/20 dark:to-amber-500/20">
@@ -227,7 +227,7 @@ export default function Home() {
             </div>
 
             {filteredMatches.length ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
                 {filteredMatches.map(({ match, index }) => (
                   <MatchCard
                     key={`${match.date}-${match.team1}-${match.team2}`}
