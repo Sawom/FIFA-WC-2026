@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { getFlagUrl } from "@/lib/utils";
 
 type Player = {
@@ -141,6 +142,13 @@ export default function PlayersPage() {
     return (
         <main className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                <Link
+                    href="/"
+                    className="mb-6 inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-bold shadow-sm hover:border-amber-500 dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                    ← All Matches
+                </Link>
+
                 {/* Header */}
                 <div className="mb-8">
                     <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300">
